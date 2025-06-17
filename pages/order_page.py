@@ -1,41 +1,48 @@
 from pages.base_page import BasePage
-from pages.locators import OrderPageLocators
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
+from pages.locators import OrderPageLocators as Locators
+
 
 class OrderPage(BasePage):
+
     def fill_first_form(self, name, surname, address, phone):
-        self.enter_text(OrderPageLocators.NAME_INPUT, name)
-        self.enter_text(OrderPageLocators.SURNAME_INPUT, surname)
-        self.enter_text(OrderPageLocators.ADDRESS_INPUT, address)
-        self.select_metro_station("Комсомольская")
-        self.enter_text(OrderPageLocators.PHONE_INPUT, phone)
-        self.click(OrderPageLocators.NEXT_BUTTON)
+        self.wait_for_element_clickable(Locators.NAME_INPUT).send_keys(name)
+        self.find_element(Locators.SURNAME_INPUT).send_keys(surname)
+        self.find_element(Locators.ADDRESS_INPUT).send_keys(address)
+
+        self.click(Locators.METRO_FIELD)
+        self.wait_for_element_clickable(Locators.METRO_OPTION("Сокольники")).click()
+
+        self.find_element(Locators.PHONE_INPUT).send_keys(phone)
+        self.click(Locators.NEXT_BUTTON)
 
     def fill_second_form_and_submit(self, date, rent_duration, comment):
-        date_input = self.find_element(OrderPageLocators.DATE_INPUT)
-        date_input.click()
-        date_input.send_keys(Keys.CONTROL + "a")
+        date_input = self.find_element(Locators.DATE_INPUT)
+        self.scroll_to_element(date_input)
         date_input.send_keys(date)
 
-        # Клик по нужному дню в календаре
-        self.click((By.CLASS_NAME, "react-datepicker__day--012"))
+        page_header = self.find_element(Locators.PAGE_HEADER)
+        self.scroll_to_element(page_header)
+        page_header.click()
 
-        self.click(OrderPageLocators.RENT_DROPDOWN)
-        self.click(OrderPageLocators.rent_option(rent_duration))
+        rent_dropdown = self.find_element(Locators.RENT_DROPDOWN)
+        self.scroll_to_element(rent_dropdown)
+        rent_dropdown.click()
 
-        self.click(OrderPageLocators.COLOR_CHECKBOX)
-        self.enter_text(OrderPageLocators.COMMENT_INPUT, comment)
-        self.click(OrderPageLocators.SUBMIT_BUTTON)
+        rent_option = self.find_element(Locators.RENT_OPTION(rent_duration))
+        self.scroll_to_element(rent_option)
+        rent_option.click()
 
-    def confirm_order(self):
-        self.click(OrderPageLocators.CONFIRM_YES_BUTTON)
+        comment_input = self.find_element(Locators.COMMENT_INPUT)
+        self.scroll_to_element(comment_input)
+        comment_input.send_keys(comment)
 
-    def select_metro_station(self, name):
-        self.enter_text(OrderPageLocators.METRO_INPUT, name)
-        self.click(OrderPageLocators.station_option(name))
+        order_button = self.find_element(Locators.ORDER_BUTTON)
+        self.scroll_to_element(order_button)
+        order_button.click()
 
-    def wait_for_success_popup_and_click_view_status(self):
-        # Ожидаем появление окна с сообщением об успешном заказе
-        self.find_element((By.XPATH, "//div[contains(text(),'Заказ оформлен')]"))
-        self.click(OrderPageLocators.VIEW_STATUS_BUTTON)
+        yes_button = self.find_element(Locators.YES_BUTTON)
+        self.scroll_to_element(yes_button)
+        yes_button.click()
+
+    def wait_for_success_popup(self):
+        self.wait_for_element_visible(Locators.SUCCESS_POPUP)

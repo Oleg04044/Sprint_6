@@ -1,31 +1,33 @@
-import pytest
-from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+import allure
 from pages.logo_page import LogoPage
 
-@pytest.fixture
-def driver():
-    driver = webdriver.Firefox()
-    driver.get("https://qa-scooter.praktikum-services.ru/")
-    yield driver
-    driver.quit()
-
+@allure.epic("Логотипы")
+@allure.feature("Навигация по логотипам")
 def test_scooter_logo_navigates_to_main(driver):
     page = LogoPage(driver)
-    driver.execute_script("window.scrollTo(0, 0);")
-    page.click_scooter_logo()
-    assert "scooter" in driver.current_url.lower()
 
+    with allure.step("Прокрутить страницу наверх"):
+        page.scroll_to_top()
+
+    with allure.step("Кликнуть на логотип Самоката"):
+        page.click_scooter_logo()
+
+    with allure.step("Проверить, что открыта главная страница Самоката"):
+        assert page.is_on_main_page()
+
+
+@allure.epic("Логотипы")
+@allure.feature("Навигация по логотипам")
 def test_yandex_logo_opens_dzen(driver):
     page = LogoPage(driver)
-    driver.execute_script("window.scrollTo(0, 0);")
 
-    main_window = driver.current_window_handle
-    page.click_yandex_logo()
+    with allure.step("Прокрутить страницу наверх"):
+        page.scroll_to_top()
 
-    WebDriverWait(driver, 10).until(lambda d: len(d.window_handles) > 1)
-    new_window = [w for w in driver.window_handles if w != main_window][0]
-    driver.switch_to.window(new_window)
+    with allure.step("Кликнуть на логотип Яндекса"):
+        main_window = page.get_current_window()
+        page.click_yandex_logo()
+        page.switch_to_new_window(main_window)
 
-    WebDriverWait(driver, 10).until(lambda d: "dzen" in d.current_url or "yandex" in d.current_url)
-    assert "dzen" in driver.current_url or "yandex" in driver.current_url
+    with allure.step("Проверить, что открыт Дзен"):
+        assert page.is_on_dzen_page()
