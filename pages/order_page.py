@@ -1,9 +1,10 @@
 from pages.base_page import BasePage
 from pages.locators import OrderPageLocators as Locators
-
+import allure
 
 class OrderPage(BasePage):
 
+    @allure.step("Заполнить первую форму: имя={name}, фамилия={surname}, адрес={address}, телефон={phone}")
     def fill_first_form(self, name, surname, address, phone):
         self.wait_for_element_clickable(Locators.NAME_INPUT).send_keys(name)
         self.find_element(Locators.SURNAME_INPUT).send_keys(surname)
@@ -15,6 +16,7 @@ class OrderPage(BasePage):
         self.find_element(Locators.PHONE_INPUT).send_keys(phone)
         self.click(Locators.NEXT_BUTTON)
 
+    @allure.step("Заполнить вторую форму: дата={date}, срок аренды={rent_duration}, комментарий={comment}")
     def fill_second_form_and_submit(self, date, rent_duration, comment):
         date_input = self.find_element(Locators.DATE_INPUT)
         self.scroll_to_element(date_input)
@@ -44,5 +46,6 @@ class OrderPage(BasePage):
         self.scroll_to_element(yes_button)
         yes_button.click()
 
+    @allure.step("Дождаться попапа успешного заказа")
     def wait_for_success_popup(self):
         self.wait_for_element_visible(Locators.SUCCESS_POPUP)

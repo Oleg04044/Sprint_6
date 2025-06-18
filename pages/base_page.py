@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 
+
 class BasePage:
     def __init__(self, driver):
         self.driver = driver
@@ -17,8 +18,11 @@ class BasePage:
 
     @allure.step("Найти элемент и кликнуть по локатору: {locator}")
     def click(self, locator):
-        element = self.wait_for_element_clickable(locator)
+        element = self.find_element(locator)
         self.scroll_to_element(element)
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.element_to_be_clickable(locator)
+        )
         element.click()
 
     @allure.step("Очистить и ввести текст: '{text}' в элемент по локатору: {locator}")
@@ -65,6 +69,12 @@ class BasePage:
     def scroll_to_element(self, element):
         self.driver.execute_script(
             "arguments[0].scrollIntoView({block: 'center'});", element
+        )
+
+    @allure.step("Ожидать, что URL содержит подстроку: {text}")
+    def wait_for_url_contains(self, text):
+        WebDriverWait(self.driver, self.timeout).until(
+            EC.url_contains(text)
         )
 
     @allure.step("Получить идентификатор текущего окна браузера")

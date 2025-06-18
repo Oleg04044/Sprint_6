@@ -1,7 +1,9 @@
-from selenium.webdriver.support.ui import WebDriverWait
 from pages.locators import LogoPageLocators
-from pages.base_page import BasePage  # Не забудь импортировать BasePage!
+from pages.base_page import BasePage
+from selenium.webdriver.support.ui import WebDriverWait
+
 import allure
+
 
 class LogoPage(BasePage):
 
@@ -23,15 +25,14 @@ class LogoPage(BasePage):
 
     @allure.step("Проверить, что пользователь перешел в Дзен")
     def is_on_dzen_page(self):
-        WebDriverWait(self.driver, self.timeout).until(
-            lambda d: "dzen" in d.current_url
-        )
-        return "dzen" in self.driver.current_url
+        self.wait_for_url_contains("dzen")
+        return "dzen" in self.driver.current_url.lower()
 
     @allure.step("Переключиться на новую вкладку")
     def switch_to_new_window(self, main_window):
-        windows = self.driver.window_handles
-        for window in windows:
-            if window != main_window:
-                self.driver.switch_to.window(window)
-                break
+        # Фикс: реальная логика переключения!
+        WebDriverWait(self.driver, self.timeout).until(
+            lambda d: len(d.window_handles) > 1
+        )
+        new_window = [w for w in self.driver.window_handles if w != main_window][0]
+        self.driver.switch_to.window(new_window)
